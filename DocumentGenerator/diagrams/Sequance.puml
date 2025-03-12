@@ -1,0 +1,39 @@
+﻿@startuml
+actor "Пользователь" as User
+participant "UI (Form)" as UI
+participant "Template Controller" as TC
+participant "TemplateParser" as TP
+participant "Document Generator" as DG
+participant "Email Module" as EM
+participant "DB Logger" as DB
+
+== Выбор и анализ шаблона ==
+User -> UI: Выбор шаблона (открытие диалога)
+UI -> TC: loadTemplate(filePath)
+TC -> TP: parseTemplate(file)
+TP --> TC: возвращает шаблон с полями
+TC -> UI: displayFields(fields)
+UI -> DB: log("Выбор шаблона", filePath)
+UI -> DB: log("Анализ шаблона", "Найдено полей: " + count(fields))
+
+== Заполнение и генерация документа ==
+User -> UI: Заполнение полей формы
+UI -> TC: submitFormData(filledData)
+TC -> DG: generateDocument(parsedTemplate, filledData)
+DG --> TC: возвращает сгенерированный документ
+TC -> UI: displayDocument(document)
+UI -> DB: log("Заполнение шаблона", "Данные: " + filledData)
+
+== Сохранение документа ==
+User -> UI: Выбор сохранения документа
+UI -> UI: saveDocument(document, savePath)
+UI -> DB: log("Сохранение документа", savePath)
+
+== Отправка документа по Email ==
+User -> UI: Выбор отправки email
+UI -> UI: Ввод данных получателя и сопроводительного текста
+UI -> EM: sendEmail(document, recipient, subject, message)
+EM --> UI: возвращает статус отправки
+UI -> DB: log("Отправка email", "Получатель: " + recipient)
+
+@enduml
